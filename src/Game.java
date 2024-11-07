@@ -136,39 +136,42 @@ public class Game {
     }
 
     public void playerTurn() {
-        Player currentPlayer = activePlayer;
         boolean successfulFish;
-
         Player targetPlayer;
         int targetRank;
 
-        currentPlayer.checkForBooks();
-        currentPlayer.sortHand();
+        activePlayer.checkForBooks();
+        activePlayer.sortHand();
+
+        if (activePlayer.getSizeOfHand() < 1) {
+            System.out.println("You do not have any cards, so you Go Fish.");
+            activePlayer.addCardsToHand(deck.drawCards(1));
+        }
+
         do {
             successfulFish = false;
-            System.out.println(playerStats(currentPlayer));
+            System.out.println(playerStats());
             targetPlayer = chooseTargetPlayer();
             targetRank = chooseTargetRank();
             if (checkTargetPlayerHand(targetPlayer, targetRank)) {
-                moveCardsFromTargetToPlayer(currentPlayer, targetPlayer, targetRank);
-                currentPlayer.checkForBooks();
+                moveCardsFromTargetToPlayer(activePlayer, targetPlayer, targetRank);
+                activePlayer.checkForBooks();
                 successfulFish = true;
-            }
-            else {
+            } else {
                 System.out.println("\nGO FISH!\n");
                 if (deck.getNumberOfCards() == 0) {
                     removePlayer();
-                }
-                else {
-                    currentPlayer.addCardsToHand(deck.drawCards(1));
+                } else {
+                    activePlayer.addCardsToHand(deck.drawCards(1));
                 }
             }
         }
         while (successfulFish && getTotalBooks() < 13);
+
     }
 
-    public String playerStats(Player currentPlayer) {
-        return currentPlayer + "\n" + "Cards in Deck: " +
+    public String playerStats() {
+        return activePlayer + "\n" + "Cards in Deck: " +
                 deck.getNumberOfCards() + "\n\n" + getPlayerHandCounts();
     }
 
@@ -210,8 +213,13 @@ public class Game {
         do {
             System.out.print("Which rank will you ask for?: ");
             targetRank = strRankToIntRank(input.next());
-            if (targetRank < 13)
-                validTarget = true;
+            if(targetRank < 13)
+                if (activePlayer.cardsOfRankInHand(targetRank) > 0) {
+                    validTarget = true;
+                }
+                else {
+                    System.out.println("You must have a card of that rank in your hand.\n");
+                }
             else
                 System.out.println("That is not a valid rank.\n");
         }

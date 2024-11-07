@@ -105,13 +105,7 @@ public class Player {
     public void checkForBooks() {
         HashMap<Integer, Integer> rankCounts = new HashMap<>();
         for (Card card: hand) {
-            if (rankCounts.containsKey(card.getRank())) {
-                int count = rankCounts.get(card.getRank());
-                rankCounts.put(card.getRank(), count + 1);
-            }
-            else {
-                rankCounts.put(card.getRank(), 1);
-            }
+            rankCounts.compute(card.getRank(), (k, count) -> (count == null) ? 1 : count + 1);
         }
 
         for (Map.Entry<Integer, Integer> count: rankCounts.entrySet()) {
